@@ -1,6 +1,6 @@
 fastapi
 uvicorn[standard]
 python-multipart
-retell
 python-dotenv
 twilio
+retell-sdk
