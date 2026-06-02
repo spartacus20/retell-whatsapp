@@ -82,6 +82,28 @@ async def new_call(request: Request):
             headers={"Content-Type": "application/xml"}
         )
 
+@app.get("/asterisk-new-call")
+async def asterisk_new_call(from_number: str, to_number: str):
+    """Endpoint para Asterisk: registra la llamada en Retell y devuelve el call_id en texto plano."""
+    logger.info(f"asterisk-new-call: From: {from_number}, To: {to_number}")
+    try:
+        retell_call_response = retell_client.call.register_phone_call(
+            agent_id=RETELL_AGENT_ID,
+            from_number=from_number,
+            to_number=to_number,
+            direction="inbound"
+        )
+        call_id = retell_call_response.call_id
+        logger.info(f"asterisk-new-call: call_id registrado: {call_id}")
+        # Devolvemos SOLO el call_id, sin JSON, para que Asterisk lo lea directo
+        return Response(content=call_id, media_type="text/plain")
+    except Exception as e:
+        logger.error(f"asterisk-new-call: Error: {e}")
+        # Devolver vacío para que el dialplan detecte el fallo
+        return Response(content="", media_type="text/plain", status_code=500)
+
+
+
 # Almacenamiento de datos de llamadas (necesario para el endpoint new-call)
 call_data_store = {}
 
