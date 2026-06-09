@@ -82,6 +82,41 @@ async def new_call(request: Request):
             headers={"Content-Type": "application/xml"}
         )
 
+@app.post("/new-call/{agent_id}")
+async def new_call_by_agent(agent_id: str, request: Request):
+    """Maneja llamadas entrantes de Twilio e inicia llamadas Retell usando un agent_id de la ruta."""
+    form_data = await request.form()
+    
+    call_sid = form_data.get('CallSid')
+    from_number = form_data.get('From')
+    to_number = form_data.get('To')
+    
+    logger.info(f"new-call-by-agent: Agent ID: {agent_id}, Call SID: {call_sid}, From: {from_number}, To: {to_number}")
+    
+    try:
+        sip_endpoint = f"sip:{agent_id}@verbeo-ai.sip.twilio.com"
+        logger.info(f"new-call-by-agent: Dialing SIP endpoint: {sip_endpoint}")
+        
+        voice_response = VoiceResponse()
+        voice_response.dial().sip(sip_endpoint)
+        
+        return Response(
+            content=str(voice_response),
+            media_type="application/xml",
+            headers={"Content-Type": "application/xml"}
+        )
+        
+    except Exception as e:
+        logger.error(f"new-call-by-agent: Error: {e}, type: {type(e)}")
+        voice_response = VoiceResponse()
+        voice_response.say("Sorry, there was an error connecting.")
+        
+        return Response(
+            content=str(voice_response),
+            media_type="application/xml",
+            headers={"Content-Type": "application/xml"}
+        )
+
 @app.get("/asterisk-new-call")
 async def asterisk_new_call(from_number: str, to_number: str):
     """Endpoint para Asterisk: registra la llamada en Retell y devuelve el call_id en texto plano."""
