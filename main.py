@@ -94,7 +94,7 @@ async def new_call_by_agent(agent_id: str, request: Request):
     logger.info(f"new-call-by-agent: Agent ID: {agent_id}, Call SID: {call_sid}, From: {from_number}, To: {to_number}")
     
     try:
-        sip_endpoint = f"sip:{agent_id}@verbeo-ai.sip.twilio.com"
+        sip_endpoint = f"{agent_id}@verbeo-ai.sip.twilio.com"
         logger.info(f"new-call-by-agent: Dialing SIP endpoint: {sip_endpoint}")
         
         voice_response = VoiceResponse()
